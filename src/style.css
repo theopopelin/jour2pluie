@@ -79,6 +79,10 @@ header {
   line-height: 1;
 }
 
+.logo-green {
+  color: var(--accent);
+}
+
 /* Workspace */
 
 .workspace {
