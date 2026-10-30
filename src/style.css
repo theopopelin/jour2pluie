@@ -8,7 +8,6 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 
-  --background: #0b0d0c;
   --panel: #111412;
   --border: #292e2a;
   --muted: #858c85;
@@ -38,9 +37,10 @@ input:focus-visible,
 }
 
 .app {
-  max-width: 1440px;
+  width: 100%;
+  max-width: 1800px;
   margin: auto;
-  padding: 0 6%;
+  padding: 0 4%;
 }
 
 header,
@@ -70,9 +70,9 @@ header h1 span {
 
 .workspace {
   display: grid;
-  grid-template-columns: minmax(240px, 0.75fr) minmax(0, 1.5fr);
+  grid-template-columns: minmax(220px, 0.55fr) minmax(0, 2fr);
   gap: 20px;
-  margin: 70px 0 40px;
+  margin: 50px 0 40px;
 }
 
 .controls,
@@ -191,9 +191,10 @@ h2 {
 }
 
 .ascii-container {
-  display: flex;
-  min-height: 400px;
-  max-height: 650px;
+  display: block;
+  width: 100%;
+  min-height: 500px;
+  max-height: 80vh;
   margin-top: 24px;
   overflow: auto;
   background: #090b09;
@@ -201,6 +202,8 @@ h2 {
 }
 
 .ascii-container pre {
+  width: max-content;
+  min-width: 100%;
   margin: 0;
   padding: 20px;
   color: var(--accent);
@@ -211,7 +214,7 @@ h2 {
 .empty {
   display: flex;
   width: 100%;
-  min-height: 400px;
+  min-height: 500px;
   align-items: center;
   justify-content: center;
   flex-direction: column;
@@ -272,4 +275,35 @@ footer {
   .ascii-container pre {
     font-size: 6px;
   }
+}
+
+/* Scrollbars */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #424a42 #090b09;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #090b09;
+  border-radius: 8px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #424a42;
+  border: 2px solid #090b09;
+  border-radius: 8px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+*::-webkit-scrollbar-corner {
+  background: #090b09;
 }
