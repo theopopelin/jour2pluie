@@ -3,7 +3,8 @@ const DEFAULT_CHARACTERS = "@%#*+=-:. ";
 export function imageToAscii(
   image,
   {
-    width = 100,
+    scale = 100,
+    scaleMode = "width",
     characters = DEFAULT_CHARACTERS,
     invert = false,
   } = {}
@@ -16,17 +17,41 @@ export function imageToAscii(
     throw new Error("At least two characters are required.");
   }
 
-  const columns = Math.max(1, Math.floor(width));
+  if (!["width", "height"].includes(scaleMode)) {
+    throw new Error("Invalid scale mode.");
+  }
 
-  // Compensation des proportions des caractères monospace.
+  const value = Math.max(1, Math.floor(scale));
+  const aspectRatio = image.width / image.height;
+
+  // Use the same resolution calculation for both modes.
+  // The mode only determines which dimension is used as reference.
+  const referenceScale = value;
+
+  const columns = Math.max(
+    1,
+    Math.round(
+      scaleMode === "width"
+        ? referenceScale
+        : referenceScale * aspectRatio
+    )
+  );
+
   const rows = Math.max(
     1,
-    Math.round((image.height / image.width) * columns * 0.5)
+    Math.round(
+      scaleMode === "height"
+        ? referenceScale
+        : referenceScale / aspectRatio
+    )
   );
+
+  // Compensate for the proportions of monospace characters.
+  const adjustedRows = Math.max(1, Math.round(rows * 0.5));
 
   const canvas = document.createElement("canvas");
   canvas.width = columns;
-  canvas.height = rows;
+  canvas.height = adjustedRows;
 
   const context = canvas.getContext("2d", {
     willReadFrequently: true,
@@ -37,19 +62,19 @@ export function imageToAscii(
   }
 
   context.fillStyle = "#ffffff";
-  context.fillRect(0, 0, columns, rows);
-  context.drawImage(image, 0, 0, columns, rows);
+  context.fillRect(0, 0, columns, adjustedRows);
+  context.drawImage(image, 0, 0, columns, adjustedRows);
 
   const { data } = context.getImageData(
     0,
     0,
     columns,
-    rows
+    adjustedRows
   );
 
   const output = [];
 
-  for (let y = 0; y < rows; y++) {
+  for (let y = 0; y < adjustedRows; y++) {
     let line = "";
 
     for (let x = 0; x < columns; x++) {
@@ -60,7 +85,6 @@ export function imageToAscii(
       const blue = data[index + 2];
       const alpha = data[index + 3] / 255;
 
-      // Calcul de luminosité perceptuelle.
       const brightness =
         (0.2126 * red +
           0.7152 * green +
@@ -70,13 +94,13 @@ export function imageToAscii(
 
       const normalizedBrightness = brightness / 255;
 
-      const value = invert
+      const brightnessValue = invert
         ? 1 - normalizedBrightness
         : normalizedBrightness;
 
       const characterIndex = Math.min(
         characters.length - 1,
-        Math.floor(value * characters.length)
+        Math.floor(brightnessValue * characters.length)
       );
 
       line += characters[characterIndex];

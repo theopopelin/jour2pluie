@@ -1,12 +1,13 @@
 <script setup>
 import { ref, watch, onBeforeUnmount } from "vue";
-import { imageToAscii } from "../utils/imageToAscii.js";
-import AsciiLogo from "../components/AsciiLogo.vue";
+import { imageToAscii } from "@/utils/imageToAscii.js";
+import AsciiLogo from "@/components/AsciiLogo.vue";
 
 const imagePreview = ref("");
 const image = ref(null);
 const ascii = ref("");
-const width = ref(200);
+const scale = ref(200);
+const scaleMode = ref("width");
 const invert = ref(false);
 const error = ref("");
 const copied = ref(false);
@@ -18,7 +19,8 @@ function generate() {
 
   try {
     ascii.value = imageToAscii(image.value, {
-      width: width.value,
+      scale: scale.value,
+      scaleMode: scaleMode.value,
       invert: invert.value,
     });
 
@@ -29,7 +31,7 @@ function generate() {
   }
 }
 
-watch([width, invert], generate);
+watch([scale, scaleMode, invert], generate);
 
 function handleFile(event) {
   const file = event.target.files?.[0];
@@ -133,20 +135,33 @@ onBeforeUnmount(() => {
         </div>
 
         <div class="setting">
-          <label for="width">
-            Width
-            <span>{{ width }} characters</span>
+          <label for="scale">
+            {{ scaleMode === "height" ? "Height" : "Width" }}
+            <span>
+              {{ scale }}
+              {{ scaleMode === "height" ? "lines" : "characters" }}
+            </span>
           </label>
 
           <input
-            id="width"
-            v-model.number="width"
+            id="scale"
+            v-model.number="scale"
             type="range"
             min="40"
             max="200"
             step="10"
           />
         </div>
+
+        <label class="checkbox">
+          <input
+            v-model="scaleMode"
+            type="checkbox"
+            true-value="height"
+            false-value="width"
+          />
+          Scale to height
+        </label>
 
         <label class="checkbox">
           <input v-model="invert" type="checkbox" />
