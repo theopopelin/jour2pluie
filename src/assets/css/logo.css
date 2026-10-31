@@ -1,0 +1,26 @@
+.site-header {
+  display: flex;
+  min-width: 0;
+  overflow: hidden;
+  padding: 30px 0 15px;
+  border-bottom: 1px solid var(--border);
+}
+
+.ascii-logo {
+  display: block;
+  flex: 1;
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
+  overflow: hidden;
+  white-space: pre;
+  color: #e8e9e5;
+  font-family: var(--font-mono);
+  font-size: 3px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.logo-green {
+  color: var(--accent);
+}

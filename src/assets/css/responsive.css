@@ -1,0 +1,33 @@
+@media (max-width: 760px) {
+  .app {
+    padding: 0 16px;
+  }
+
+  .ascii-logo {
+  font-size: 2px;
+  }
+
+  .workspace {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-top: 32px;
+  }
+
+  .controls,
+  .output {
+    padding: 16px;
+  }
+
+  .ascii-container {
+    min-height: 400px;
+  }
+
+  .ascii-container pre {
+    font-size: 6px;
+    padding: 16px;
+  }
+
+  .empty {
+    min-height: 400px;
+  }
+}
