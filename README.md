@@ -29,5 +29,5 @@ Input an image of your choice, and within milliseconds obtain an Ascii art !
 
 # Stack
 
-Built with Javascript.
-Use `docker compose up -d --build` to run it by yourself !
+- Built with Javascript.
+- Use `docker compose up -d --build` to run it by yourself !
