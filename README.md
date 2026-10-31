@@ -24,8 +24,8 @@
                                                                                                                                                       
 # Jour2pluie
 
-Jour2pluie is a simple Image to Ascii art converter
-Input an image of your choice, and within milliseconds obtain an Ascii art !
+- Jour2pluie is a simple Image to Ascii art converter
+- Input an image of your choice, and within milliseconds obtain an Ascii art !
 
 # Stack
 
