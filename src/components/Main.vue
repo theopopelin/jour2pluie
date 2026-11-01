@@ -1,18 +1,24 @@
 <script setup>
-import { ref, watch, onBeforeUnmount, onMounted } from "vue";
+import { ref, watch } from "vue";
 import { imageToAscii } from "@/utils/imageToAscii.js";
+import { useImageLoader } from "@/composables/useImageLoader.js";
+import { useClipboard } from "@/composables/useClipboard.js";
 import AsciiLogo from "@/components/AsciiLogo.vue";
 
-const imagePreview = ref("");
-const image = ref(null);
+const {
+  imagePreview,
+  image,
+  error,
+  loadImage,
+} = useImageLoader();
+
+useClipboard(loadImage);
+
 const ascii = ref("");
 const scale = ref(200);
 const scaleMode = ref("width");
 const invert = ref(false);
-const error = ref("");
 const copied = ref(false);
-
-let objectUrl = null;
 
 function generate() {
   if (!image.value) return;
@@ -31,50 +37,7 @@ function generate() {
   }
 }
 
-watch([scale, scaleMode, invert], generate);
-
-function loadImage(file) {
-  if (!file.type.startsWith("image/")) {
-    error.value = "Please select a valid image.";
-    return;
-  }
-
-  if (file.size > 10 * 1024 * 1024) {
-    error.value = "Maximum file size is 10 MB.";
-    return;
-  }
-
-  if (objectUrl) {
-    URL.revokeObjectURL(objectUrl);
-  }
-
-  image.value = null;
-  ascii.value = "";
-  imagePreview.value = "";
-  error.value = "";
-
-  objectUrl = URL.createObjectURL(file);
-  imagePreview.value = objectUrl;
-
-  const img = new Image();
-
-  img.onload = () => {
-    image.value = img;
-    generate();
-  };
-
-  img.onerror = () => {
-    error.value = "Unable to load this image.";
-    imagePreview.value = "";
-
-    if (objectUrl) {
-      URL.revokeObjectURL(objectUrl);
-      objectUrl = null;
-    }
-  };
-
-  img.src = objectUrl;
-}
+watch([image, scale, scaleMode, invert], generate);
 
 function handleFile(event) {
   const file = event.target.files?.[0];
@@ -83,31 +46,8 @@ function handleFile(event) {
 
   loadImage(file);
 
-  // Allow selecting the same file again.
   event.target.value = "";
 }
-
-function handlePaste(event) {
-  const items = event.clipboardData?.items;
-
-  if (!items) return;
-
-  for (const item of items) {
-    if (item.type.startsWith("image/")) {
-      const file = item.getAsFile();
-
-      if (file) {
-        event.preventDefault();
-        loadImage(file);
-        return;
-      }
-    }
-  }
-}
-
-onMounted(() => {
-  window.addEventListener("paste", handlePaste);
-});
 
 async function copyAscii() {
   try {
@@ -138,14 +78,6 @@ function downloadAscii() {
 
   URL.revokeObjectURL(url);
 }
-
-onBeforeUnmount(() => {
-  window.removeEventListener("paste", handlePaste);
-
-  if (objectUrl) {
-    URL.revokeObjectURL(objectUrl);
-  }
-});
 </script>
 
 <template>
