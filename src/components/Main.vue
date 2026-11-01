@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, onBeforeUnmount } from "vue";
+import { ref, watch, onBeforeUnmount, onMounted } from "vue";
 import { imageToAscii } from "@/utils/imageToAscii.js";
 import AsciiLogo from "@/components/AsciiLogo.vue";
 
@@ -33,11 +33,7 @@ function generate() {
 
 watch([scale, scaleMode, invert], generate);
 
-function handleFile(event) {
-  const file = event.target.files?.[0];
-
-  if (!file) return;
-
+function loadImage(file) {
   if (!file.type.startsWith("image/")) {
     error.value = "Please select a valid image.";
     return;
@@ -54,6 +50,7 @@ function handleFile(event) {
 
   image.value = null;
   ascii.value = "";
+  imagePreview.value = "";
   error.value = "";
 
   objectUrl = URL.createObjectURL(file);
@@ -69,10 +66,48 @@ function handleFile(event) {
   img.onerror = () => {
     error.value = "Unable to load this image.";
     imagePreview.value = "";
+
+    if (objectUrl) {
+      URL.revokeObjectURL(objectUrl);
+      objectUrl = null;
+    }
   };
 
   img.src = objectUrl;
 }
+
+function handleFile(event) {
+  const file = event.target.files?.[0];
+
+  if (!file) return;
+
+  loadImage(file);
+
+  // Allow selecting the same file again.
+  event.target.value = "";
+}
+
+function handlePaste(event) {
+  const items = event.clipboardData?.items;
+
+  if (!items) return;
+
+  for (const item of items) {
+    if (item.type.startsWith("image/")) {
+      const file = item.getAsFile();
+
+      if (file) {
+        event.preventDefault();
+        loadImage(file);
+        return;
+      }
+    }
+  }
+}
+
+onMounted(() => {
+  window.addEventListener("paste", handlePaste);
+});
 
 async function copyAscii() {
   try {
@@ -105,6 +140,8 @@ function downloadAscii() {
 }
 
 onBeforeUnmount(() => {
+  window.removeEventListener("paste", handlePaste);
+
   if (objectUrl) {
     URL.revokeObjectURL(objectUrl);
   }
@@ -128,6 +165,7 @@ onBeforeUnmount(() => {
           <span>+</span>
           <strong>Choose an image</strong>
           <small>PNG, JPG, WebP · 10 MB max</small>
+          <small>Or paste with Ctrl + V</small>
         </label>
 
         <div v-if="imagePreview" class="preview">
