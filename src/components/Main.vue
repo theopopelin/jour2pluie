@@ -3,6 +3,7 @@ import { ref, watch } from "vue";
 import { imageToAscii } from "@/utils/imageToAscii.js";
 import { useImageLoader } from "@/composables/useImageLoader.js";
 import { useClipboard } from "@/composables/useClipboard.js";
+import { useAsciiExport } from "@/composables/useAsciiExport.js";
 import AsciiLogo from "@/components/AsciiLogo.vue";
 
 const {
@@ -15,10 +16,18 @@ const {
 useClipboard(loadImage);
 
 const ascii = ref("");
+const asciiContainer = ref(null);
+
 const scale = ref(150);
 const scaleMode = ref("width");
 const invert = ref(false);
-const copied = ref(false);
+
+const {
+  copied,
+  copyAscii,
+  downloadAscii,
+  downloadPng,
+} = useAsciiExport(ascii, asciiContainer, error);
 
 function generate() {
   if (!image.value) return;
@@ -47,36 +56,6 @@ function handleFile(event) {
   loadImage(file);
 
   event.target.value = "";
-}
-
-async function copyAscii() {
-  try {
-    await navigator.clipboard.writeText(ascii.value);
-    copied.value = true;
-
-    setTimeout(() => {
-      copied.value = false;
-    }, 1500);
-  } catch {
-    error.value = "Unable to copy the ASCII output.";
-  }
-}
-
-function downloadAscii() {
-  if (!ascii.value) return;
-
-  const blob = new Blob([ascii.value], {
-    type: "text/plain;charset=utf-8",
-  });
-
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-
-  link.href = url;
-  link.download = "jour2pluie.txt";
-  link.click();
-
-  URL.revokeObjectURL(url);
 }
 </script>
 
@@ -147,7 +126,7 @@ function downloadAscii() {
           <span>{{ ascii ? "GENERATED" : "WAITING" }}</span>
         </div>
 
-        <div class="ascii-container">
+        <div ref="asciiContainer" class="ascii-container">
           <pre v-if="ascii">{{ ascii }}</pre>
 
           <div v-else class="empty">
@@ -169,6 +148,13 @@ function downloadAscii() {
             @click="downloadAscii"
           >
             Download .txt
+          </button>
+
+          <button
+            :disabled="!ascii"
+            @click="downloadPng"
+          >
+            Download .png
           </button>
         </div>
       </div>
