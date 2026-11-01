@@ -3,8 +3,13 @@
     padding: 0 16px;
   }
 
+  .site-header {
+    height: 160px;
+    padding: 16px;
+  }
+
   .ascii-logo {
-  font-size: 2px;
+    font-size: 3px;
   }
 
   .workspace {
@@ -29,5 +34,9 @@
 
   .empty {
     min-height: 400px;
+  }
+
+  .actions {
+    flex-wrap: wrap;
   }
 }
