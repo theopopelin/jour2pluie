@@ -25,9 +25,9 @@
 # Jour2pluie
 
 - Jour2pluie is a simple Image to Ascii art converter
-- Input an image of your choice, and within milliseconds obtain an Ascii art !
+- Input an image of your choice, and within milliseconds obtain an Ascii art, exportable to .txt, .png or just your clipboard !
 
 # Stack
 
-- Built with Javascript.
-- Use `docker compose up -d --build` to run it by yourself !
+- Image processing runs on Javascript, Interface is basic Vuejs, app runs on Docker/vite.
+- Make sur you have Docker and use `docker compose up -d --build` to run it locally !
