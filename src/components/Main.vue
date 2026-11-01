@@ -122,7 +122,7 @@ function handleFile(event) {
 
       <div class="output">
         <div class="output-header">
-          <h2>ASCII</h2>
+          <h2>ASCII - {{ ascii.length.toLocaleString("fr-FR") }} characters</h2>
           <span>{{ ascii ? "GENERATED" : "WAITING" }}</span>
         </div>
 
