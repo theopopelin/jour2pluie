@@ -30,7 +30,10 @@ const {
 } = useAsciiExport(ascii, asciiContainer, error);
 
 function generate() {
-  if (!image.value) return;
+  if (!image.value) {
+    ascii.value = "";
+    return;
+  }
 
   try {
     ascii.value = imageToAscii(image.value, {
