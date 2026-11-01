@@ -15,7 +15,7 @@ const {
 useClipboard(loadImage);
 
 const ascii = ref("");
-const scale = ref(200);
+const scale = ref(150);
 const scaleMode = ref("width");
 const invert = ref(false);
 const copied = ref(false);
