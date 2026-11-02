@@ -19,7 +19,6 @@ steps:
       - --image=europe-west9-docker.pkg.dev/jour2pluie/jour2pluie/app:$COMMIT_SHA
       - --region=europe-west9
       - --platform=managed
-      - --allow-unauthenticated
       - --min=0
       - --max=3
       - --memory=256Mi
