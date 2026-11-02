@@ -1,0 +1,33 @@
+steps:
+  # 1. Docker image
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -f
+      - Dockerfile.prod
+      - -t
+      - europe-west9-docker.pkg.dev/jour2pluie/jour2pluie/app:$COMMIT_SHA
+      - .
+
+  # 2. Cloud Run
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - jour2pluie
+      - --image=europe-west9-docker.pkg.dev/jour2pluie/jour2pluie/app:$COMMIT_SHA
+      - --region=europe-west9
+      - --platform=managed
+      - --allow-unauthenticated
+      - --min=0
+      - --max=3
+      - --memory=256Mi
+      - --cpu=1
+
+# Artifact Registry
+images:
+  - europe-west9-docker.pkg.dev/jour2pluie/jour2pluie/app:$COMMIT_SHA
+
+options:
+  logging: CLOUD_LOGGING_ONLY
