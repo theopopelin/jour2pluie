@@ -9,7 +9,13 @@ steps:
       - europe-west9-docker.pkg.dev/jour2pluie/jour2pluie/app:$COMMIT_SHA
       - .
 
-  # 2. Cloud Run
+  # 2. Artifact Registry
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - europe-west9-docker.pkg.dev/jour2pluie/jour2pluie/app:$COMMIT_SHA
+
+  # 3. Cloud Run
   - name: gcr.io/google.com/cloudsdktool/cloud-sdk
     entrypoint: gcloud
     args:
@@ -23,10 +29,6 @@ steps:
       - --max=3
       - --memory=256Mi
       - --cpu=1
-
-# Artifact Registry
-images:
-  - europe-west9-docker.pkg.dev/jour2pluie/jour2pluie/app:$COMMIT_SHA
 
 options:
   logging: CLOUD_LOGGING_ONLY
