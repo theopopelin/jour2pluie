@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch, onBeforeUnmount } from "vue";
 
 import { imageToAscii } from "@/utils/imageToAscii.js";
 import { useImageLoader } from "@/composables/useImageLoader.js";
@@ -8,7 +8,6 @@ import { useAsciiExport } from "@/composables/useAsciiExport.js";
 import { useGifConverter } from "@/composables/useGifConverter.js";
 
 import AsciiLogo from "@/components/AsciiLogo.vue";
-import GifPreview from "@/components/GifPreview.vue";
 import AsciiPlayer from "@/components/AsciiPlayer.vue";
 
 const {
@@ -36,6 +35,12 @@ const invert = ref(false);
 const isGif = ref(false);
 const selectedGif = ref(null);
 
+const currentFrame = ref(0);
+const isPlaying = ref(false);
+const playbackSpeed = ref(1);
+
+let playbackTimer = null;
+
 const {
   copied,
   copyAscii,
@@ -51,7 +56,79 @@ function getConversionOptions() {
   };
 }
 
-// Handle static images.
+function stopPlayback() {
+  isPlaying.value = false;
+
+  if (playbackTimer !== null) {
+    clearTimeout(playbackTimer);
+    playbackTimer = null;
+  }
+}
+
+function updateCurrentFrame() {
+  const frame = frames.value[currentFrame.value];
+
+  ascii.value = frame?.ascii || "";
+}
+
+function scheduleNextFrame() {
+  if (!isPlaying.value || !frames.value.length) return;
+
+  if (playbackTimer !== null) {
+    clearTimeout(playbackTimer);
+    playbackTimer = null;
+  }
+
+  const frame = frames.value[currentFrame.value];
+
+  if (!frame) return;
+
+  const delay = Math.max(
+    20,
+    (frame.delay || 100) / playbackSpeed.value
+  );
+
+  playbackTimer = setTimeout(() => {
+    currentFrame.value =
+      (currentFrame.value + 1) % frames.value.length;
+
+    updateCurrentFrame();
+    scheduleNextFrame();
+  }, delay);
+}
+
+function play() {
+  if (!frames.value.length || isPlaying.value) return;
+
+  isPlaying.value = true;
+  scheduleNextFrame();
+}
+
+function pause() {
+  stopPlayback();
+}
+
+function togglePlayback() {
+  if (isPlaying.value) {
+    pause();
+  } else {
+    play();
+  }
+}
+
+function seekFrame(event) {
+  pause();
+
+  currentFrame.value = Number(event.target.value);
+  updateCurrentFrame();
+}
+
+function handleSpeedChange() {
+  if (isPlaying.value) {
+    scheduleNextFrame();
+  }
+}
+
 function generate() {
   if (isGif.value) return;
 
@@ -73,20 +150,15 @@ function generate() {
   }
 }
 
-// Handle the current GIF frame.
-function handleGifFrameChange(value) {
-  ascii.value = value;
-  error.value = "";
-}
-
-// Handle image and GIF uploads.
 function loadMedia(file) {
   if (!file) return;
 
   if (file.type === "image/gif") {
+    stopPlayback();
+
     isGif.value = true;
     selectedGif.value = file;
-
+    currentFrame.value = 0;
     ascii.value = "";
 
     clearFrames();
@@ -97,25 +169,27 @@ function loadMedia(file) {
     return;
   }
 
+  stopPlayback();
+
   isGif.value = false;
   selectedGif.value = null;
+  currentFrame.value = 0;
 
   clearFrames();
-
   loadImage(file);
 }
 
-// Reuse the same handler for clipboard images.
 useClipboard(loadMedia);
 
-// Static image conversion.
 watch(image, generate);
 
-// Regenerate whenever conversion settings change.
 watch(
   [scale, scaleMode, invert],
   () => {
     if (selectedGif.value) {
+      stopPlayback();
+      currentFrame.value = 0;
+
       convertGif(
         selectedGif.value,
         getConversionOptions()
@@ -126,6 +200,17 @@ watch(
   }
 );
 
+watch(frames, (newFrames) => {
+  stopPlayback();
+
+  currentFrame.value = 0;
+  ascii.value = newFrames[0]?.ascii || "";
+
+  if (newFrames.length) {
+    play();
+  }
+});
+
 function handleFile(event) {
   const file = event.target.files?.[0];
 
@@ -135,6 +220,10 @@ function handleFile(event) {
 
   event.target.value = "";
 }
+
+onBeforeUnmount(() => {
+  stopPlayback();
+});
 </script>
 
 <template>
@@ -157,12 +246,7 @@ function handleFile(event) {
           <small>Or paste with Ctrl + V</small>
         </label>
 
-        <GifPreview
-          v-if="isGif && imagePreview"
-          :src="imagePreview"
-        />
-
-        <div v-else-if="imagePreview" class="preview">
+        <div v-if="!isGif && imagePreview" class="preview">
           <img
             :src="imagePreview"
             alt="Original image"
@@ -172,6 +256,7 @@ function handleFile(event) {
         <div class="setting">
           <label for="scale">
             {{ scaleMode === "height" ? "Height" : "Width" }}
+
             <span>
               {{ scale }}
               {{ scaleMode === "height" ? "lines" : "characters" }}
@@ -206,6 +291,51 @@ function handleFile(event) {
           Invert brightness
         </label>
 
+        <div v-if="isGif" class="gif-controls">
+          <h3>GIF Controls</h3>
+
+          <div class="player-actions">
+            <button
+              :disabled="!frames.length || isProcessing"
+              @click="togglePlayback"
+            >
+              {{ isPlaying ? "Pause" : "Play" }}
+            </button>
+
+            <span>
+              {{ frames.length ? currentFrame + 1 : 0 }}
+              /
+              {{ frames.length }}
+            </span>
+          </div>
+
+          <input
+            type="range"
+            min="0"
+            :max="Math.max(0, frames.length - 1)"
+            :value="currentFrame"
+            :disabled="!frames.length || isProcessing"
+            @input="seekFrame"
+          />
+
+          <div class="setting">
+            <label for="playback-speed">
+              Playback speed
+              <span>{{ playbackSpeed }}x</span>
+            </label>
+
+            <input
+              id="playback-speed"
+              v-model.number="playbackSpeed"
+              type="range"
+              min="0.25"
+              max="2"
+              step="0.25"
+              @input="handleSpeedChange"
+            />
+          </div>
+        </div>
+
         <p v-if="error || gifError" class="error">
           {{ gifError || error }}
         </p>
@@ -218,7 +348,13 @@ function handleFile(event) {
           </h2>
 
           <span>
-            {{ isProcessing ? "PROCESSING" : ascii ? "GENERATED" : "WAITING" }}
+            {{
+              isProcessing
+                ? "PROCESSING"
+                : ascii
+                  ? "GENERATED"
+                  : "WAITING"
+            }}
           </span>
         </div>
 
@@ -233,9 +369,7 @@ function handleFile(event) {
 
           <AsciiPlayer
             v-else-if="isGif"
-            :frames="frames"
-            :autoplay="true"
-            @frame-change="handleGifFrameChange"
+            :ascii="ascii"
           />
 
           <pre v-else-if="ascii">{{ ascii }}</pre>
