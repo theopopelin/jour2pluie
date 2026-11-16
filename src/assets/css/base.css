@@ -4,17 +4,27 @@
   font-family: "Space Grotesk", sans-serif;
   color: #e8e9e5;
   background: #0b0d0c;
+  color-scheme: dark;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 
+  --background: #0b0d0c;
   --panel: #111412;
+  --panel-hover: #171c18;
   --border: #292e2a;
+  --border-hover: #414b41;
   --muted: #858c85;
   --accent: #c5ff65;
+  --accent-soft: rgba(197, 255, 101, 0.08);
+  --accent-border: rgba(197, 255, 101, 0.25);
 
   --font-body: "Space Grotesk", sans-serif;
   --font-mono: "DM Mono", monospace;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
 }
 
 * {
@@ -25,6 +35,7 @@ html {
   overflow-y: scroll;
   overflow-x: hidden;
   scrollbar-gutter: stable;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -75,4 +86,9 @@ input:focus-visible,
 
 *::-webkit-scrollbar-corner {
   background: #090b09;
+}
+
+::selection {
+  color: #0b0d0c;
+  background: var(--accent);
 }
