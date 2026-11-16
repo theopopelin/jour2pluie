@@ -6,6 +6,7 @@ import { useImageLoader } from "@/composables/useImageLoader.js";
 import { useClipboard } from "@/composables/useClipboard.js";
 import { useAsciiExport } from "@/composables/useAsciiExport.js";
 import { useGifConverter } from "@/composables/useGifConverter.js";
+import { useGifExport } from "@/composables/useGifExport.js";
 
 import AsciiLogo from "@/components/AsciiLogo.vue";
 import AsciiPlayer from "@/components/AsciiPlayer.vue";
@@ -47,6 +48,12 @@ const {
   downloadAscii,
   downloadPng,
 } = useAsciiExport(ascii, asciiContainer, error);
+
+const {
+  isExporting,
+  error: gifExportError,
+  downloadGif,
+} = useGifExport(frames);
 
 function getConversionOptions() {
   return {
@@ -336,8 +343,8 @@ onBeforeUnmount(() => {
           </div>
         </div>
 
-        <p v-if="error || gifError" class="error">
-          {{ gifError || error }}
+        <p v-if="error || gifError || gifExportError" class="error">
+          {{ gifExportError || gifError || error }}
         </p>
       </div>
 
@@ -351,9 +358,11 @@ onBeforeUnmount(() => {
             {{
               isProcessing
                 ? "PROCESSING"
-                : ascii
-                  ? "GENERATED"
-                  : "WAITING"
+                : isExporting
+                  ? "EXPORTING"
+                  : ascii
+                    ? "GENERATED"
+                    : "WAITING"
             }}
           </span>
         </div>
@@ -396,10 +405,10 @@ onBeforeUnmount(() => {
           </button>
 
           <button
-            :disabled="!ascii"
-            @click="downloadPng"
+            :disabled="!ascii || isProcessing || isExporting || (isGif && !frames.length)"
+            @click="isGif ? downloadGif() : downloadPng()"
           >
-            Download .png
+            {{ isExporting ? "Exporting..." : isGif ? "Download .gif" : "Download .png" }}
           </button>
         </div>
       </div>

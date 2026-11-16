@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "gifenc": "^1.0.3",
     "gifuct-js": "^2.1.2",
     "vue": "^3.5.44"
   },
