@@ -391,14 +391,14 @@ onBeforeUnmount(() => {
 
         <div class="actions">
           <button
-            :disabled="!ascii"
+            :disabled="!ascii || (isGif && isPlaying)"
             @click="copyAscii"
           >
             {{ copied ? "Copied!" : "Copy" }}
           </button>
 
           <button
-            :disabled="!ascii"
+            :disabled="!ascii || (isGif && isPlaying)"
             @click="downloadAscii"
           >
             Download .txt
