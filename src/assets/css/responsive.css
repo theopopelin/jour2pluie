@@ -1,3 +1,25 @@
+@media (max-width: 900px) {
+  .workspace {
+    grid-template-columns: minmax(220px, 0.8fr) minmax(0, 2fr);
+    gap: 14px;
+  }
+
+  .controls,
+  .output {
+    padding: 18px;
+  }
+
+  .ascii-container,
+  .ascii-player,
+  .empty {
+    min-height: 500px;
+  }
+
+  .actions {
+    flex-wrap: wrap;
+  }
+}
+
 @media (max-width: 760px) {
   .app {
     padding: 0 16px;
@@ -13,30 +35,79 @@
   }
 
   .workspace {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 16px;
     margin-top: 32px;
   }
 
   .controls,
   .output {
+    padding: 18px;
+  }
+
+  .upload {
+    min-height: 150px;
+  }
+
+  .setting {
+    margin-top: 24px;
+  }
+
+  .gif-controls {
     padding: 16px;
   }
 
-  .ascii-container {
-    min-height: 400px;
-  }
-
-  .ascii-container pre {
-    font-size: 6px;
-    padding: 16px;
-  }
-
+  .ascii-container,
+  .ascii-player,
   .empty {
     min-height: 400px;
   }
 
+  .ascii-container {
+    max-height: 65vh;
+  }
+
+  .ascii-container pre,
+  .ascii-player pre {
+    padding: 16px;
+    font-size: 6px;
+  }
+
   .actions {
     flex-wrap: wrap;
+  }
+
+  .actions button {
+    flex: 1 1 calc(50% - 10px);
+  }
+
+  footer {
+    padding: 20px 0;
+  }
+}
+
+@media (max-width: 420px) {
+  .app {
+    padding: 0 12px;
+  }
+
+  .controls,
+  .output {
+    padding: 14px;
+  }
+
+  .output-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .actions button {
+    flex: 1 1 100%;
+  }
+
+  .ascii-container,
+  .ascii-player,
+  .empty {
+    min-height: 320px;
   }
 }
